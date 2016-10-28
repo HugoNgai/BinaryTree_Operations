@@ -7,7 +7,7 @@ A C++ program performing BinaryTree's operations:
 4.Insert child into BinaryTree
 5.Search child in BinaryTree
 6.Getting height of BinaryTree
-7.Counting leaves of BinaryTree
+7.Counting leaves node of BinaryTree
 
 #Input introduction:
   Using '#' instead of ' '(space)

@@ -313,10 +313,73 @@ int CountLeaves(Bitree t)
 		return L+R;
 }
 
+//寻找某结点并保存其路径
+int FindPath(Bitree t,char p,Bitree path[Max])
+{											//path[Max]用于储存路径
+	Bitnode node[Max];						//用于储存结点
+	int i=0;
+
+	path[i]=t;
+	node[i]=*t;								//t为指针，*t表示取该结构型指针的整个结构数据
+	if (!t)
+		return 0;
+
+	while (i>=0)
+	{
+		while (path[i]->data==p||node[i].lchild)
+		{
+			if (path[i]->data==p)
+				return 1;
+			else
+			{
+				path[i+1]=node[i].lchild;
+				node[i+1]=*node[i].lchild;
+				node[i].lchild = NULL;				//清除该结点值,下次不再重复遍历
+				i++;
+			}
+		}
+
+		if (node[i].rchild)
+		{
+			path[i+1]=node[i].rchild;
+			node[i+1]=*node[i].rchild;
+			node[i].rchild = NULL;					//清除该结点值，下次不再重复遍历
+			i++;
+		}
+		else
+		{
+			path[i] = NULL;
+			i--;
+		}
+	}
+	if (i<0)
+		return NULL;
+}	
+
+//寻找两结点的共同祖先
+Bitree ancestor(Bitree t,char p,char q)
+{
+	Bitree path1[Max],path2[Max];
+	FindPath(t,p,path1);
+	FindPath(t,q,path2);
+	int k=0;
+
+	if (path1&&path2)
+	{
+		if (path1[k]->data!=p&&path2[k]->data!=q)
+		{
+			while(path1[k]->data==path2[k]->data)
+				k++;
+			return path1[k-1];
+		}
+	}
+	return NULL;
+}
+
 int main(void)
 {
-	Bitree T;
-	char e;
+	Bitree T,temp;
+	char e,p,q;
 	T=NULL;
 	cout<<"Please input the binary tree,# to quit:"<<endl;
 	CreateBitree(&T);
@@ -347,6 +410,12 @@ int main(void)
 	cout << Getheight(T) << endl;
 	cout<<"The leaves of Binary Tree:";
 	cout << CountLeaves(T) << endl;
+
+	cout<<"Please input the node p and q,then I will find their nearest ancestor: ";
+	cin>>p;
+	cin>>q;
+	temp=ancestor(T,p,q);
+	cout << "Their ancestor is:" << temp->data << endl;
 
 	cout<<"Please input the element you want to search in the Binary Tree:";
 	cin>>e;

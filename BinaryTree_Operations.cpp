@@ -1,5 +1,5 @@
 #include<iostream>
-#include<stdio.h>
+#include<vector>
 #define Max 100
 using namespace std;
 
@@ -145,11 +145,11 @@ void Levelorder(Bitree t)
 }
 
 //初始化
-void CreateBitree(Bitree *t)
+void CreateBitree(Bitree *t)								//仅仅通过前序遍历创建二叉树，'#'表示子树为空
 {
 	char ch;
 	scanf("%c",&ch);
-
+	//cin.get(ch);
 	if (ch=='#')
 		*t=NULL;
 	else
@@ -300,39 +300,40 @@ int Getheight(Bitree t)
 	return lh>rh?lh+1:rh+1;
 }
 
-//获取子叶数
+//获取叶子结点数
 int CountLeaves(Bitree t)
 {
-	if (t==NULL)
-		return 0;
-	int L=CountLeaves(t->lchild);
-	int R=CountLeaves(t->rchild);
-	if (L+R==0)
-		return 1;
-	else
-		return L+R;
+	static int count=0;						//定义静态变量
+	if(t!=NULL)  
+    {  
+        count=CountLeaves(t->lchild);  
+        if((t->lchild==NULL)&&(t->rchild==NULL))  
+            count=count+1;  
+        count=CountLeaves(t->rchild);  
+    }  
+    return count;  
 }
 
 //寻找某结点并保存其路径
-int FindPath(Bitree t,char p,Bitree path[Max])
+int FindPath(Bitree t,char p,vector<Bitree> *path)
 {											//path[Max]用于储存路径
 	Bitnode node[Max];						//用于储存结点
 	int i=0;
 
-	path[i]=t;
+	(*path).push_back(t);
 	node[i]=*t;								//t为指针，*t表示取该结构型指针的整个结构数据
 	if (!t)
 		return 0;
 
 	while (i>=0)
 	{
-		while (path[i]->data==p||node[i].lchild)
+		while ((*path)[i]->data==p||node[i].lchild)
 		{
-			if (path[i]->data==p)
+			if ((*path)[i]->data==p)
 				return 1;
 			else
 			{
-				path[i+1]=node[i].lchild;
+				(*path).push_back(node[i].lchild);
 				node[i+1]=*node[i].lchild;
 				node[i].lchild = NULL;				//清除该结点值,下次不再重复遍历
 				i++;
@@ -341,30 +342,49 @@ int FindPath(Bitree t,char p,Bitree path[Max])
 
 		if (node[i].rchild)
 		{
-			path[i+1]=node[i].rchild;
+			(*path).push_back(node[i].rchild);
 			node[i+1]=*node[i].rchild;
 			node[i].rchild = NULL;					//清除该结点值，下次不再重复遍历
 			i++;
 		}
 		else
 		{
-			path[i] = NULL;
+			(*path).pop_back();
 			i--;
 		}
 	}
+	
 	if (i<0)
 		return NULL;
+	
 }	
 
 //寻找两结点的共同祖先
 Bitree ancestor(Bitree t,char p,char q)
 {
-	Bitree path1[Max],path2[Max];
-	FindPath(t,p,path1);
-	FindPath(t,q,path2);
+	vector<Bitree> path1,path2;
+	vector <Bitree> ::iterator it;
+	FindPath(t,p,&path1);
+	FindPath(t,q,&path2);
 	int k=0;
+	
+	if (path1.empty() || path2.empty())
+	{
+		cout << "Can't find the path!";
+		return NULL;
+	}
+		
+	cout << "p's path:";
+	for (it=path1.begin();it!=path1.end(); it++)
+		cout << (*it)->data;
 
-	if (path1&&path2)
+	cout << endl;
+	cout << "q's path:";
+	for (it = path2.begin();it!=path2.end(); it++)
+		cout << (*it)->data;
+	cout << endl;
+
+	if (!(path1.empty())&&(!(path2.empty())))
 	{
 		if (path1[k]->data!=p&&path2[k]->data!=q)
 		{
@@ -376,13 +396,63 @@ Bitree ancestor(Bitree t,char p,char q)
 	return NULL;
 }
 
+//通过前序遍历和中序遍历序列创建二叉树(递归)
+Bitree Creat(char *pre, char *in, int nNode)
+{
+	char ch;
+	int i, lenL, lenR;
+
+	ch = pre[0];
+	Bitree Bt = (Bitree)malloc(sizeof(Bitnode));
+	Bt->data = ch;
+	Bt->lchild = NULL;
+	Bt->rchild = NULL;
+
+	if (nNode == 0)
+		return NULL;
+
+	for (i = 0; i < nNode&&in[i] != ch; i++);
+
+	lenL = i;
+	lenR = nNode - i - 1;
+
+	if (lenL > 0)
+		Bt->lchild = Creat(&(pre[1]), &(in[0]), lenL);
+	if (lenR > 0)
+		Bt->rchild = Creat(&(pre[lenL + 1]), &(in[lenL + 1]), lenR);
+	return Bt;
+}
+
 int main(void)
 {
 	Bitree T,temp;
 	char e,p,q;
-	T=NULL;
-	cout<<"Please input the binary tree,# to quit:"<<endl;
-	CreateBitree(&T);
+	vector<char> Pre;
+	vector<char> In;
+	//vector<char>::iterator it;
+	char pre, in;
+	T = NULL;
+	cout<<"Please input the preorder binary tree:"<<endl;	
+	while ((pre=getchar())!='\n')
+		Pre.push_back(pre);
+	cout << "Then input the inorder binary tree:" << endl;
+	while ((in = getchar()) != '\n')
+		In.push_back(in);
+	
+	/*cout << "p's path:";
+	for (it = Pre.begin(); it != Pre.end(); it++)
+		cout << (*it);
+
+	cout << endl;
+	cout << "q's path:";
+	for (it = In.begin(); it != In.end(); it++)
+		cout << (*it);
+	cout << endl;*/
+
+	int nNode = Pre.size();
+	/*cout << "Please input the binary tree:" << endl;
+	CreateBitree(&T);*/
+	T = Creat(&Pre[0], &In[0],nNode);
 	cout<<"Binary Tree's Preorder:"<<endl;
 	cout<<"Recursion："<<endl;
 	Preorder(T);
@@ -406,6 +476,7 @@ int main(void)
 	cout << endl;
 	cout<<"Binary Tree's Levelorder:"<<endl;
 	Levelorder(T);
+	cout << endl;
 	cout<<"The height of Binary Tree:";
 	cout << Getheight(T) << endl;
 	cout<<"The leaves of Binary Tree:";

@@ -9,6 +9,8 @@ A C++ program performing BinaryTree's operations:
 6.Getting height of BinaryTree
 7.Counting leaves node of BinaryTree
 
+(1) Creat by only using Preorder,# means an empty tree
+//Function's name in the code:CreatBitree
 #Input introduction:
   Using '#' instead of ' '(space)
   
@@ -23,3 +25,6 @@ A C++ program performing BinaryTree's operations:
     
    Input:
    -+a##*b##-c##d##/e##f##
+
+(2)Creat by using Preorder and Inorder
+//Function's name in the code:Creat
